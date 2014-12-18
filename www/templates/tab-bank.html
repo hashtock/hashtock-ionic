@@ -1,0 +1,26 @@
+<ion-view title="Current Orders">
+    <ion-content>
+        <ion-list>
+            <ion-item ng-repeat="tag in tags">
+                <div class="row" ng-click="toggle(tag)">
+                    <div class="col col-80">{{ tag.hashtag }}</div>
+                    <div class="col col-10">{{ tag.in_bank|number:2 }}</div>
+                    <div class="col col-10">{{ tag.value|number:2 }}</div>
+                </div>
+                <div class="row buyOrder" ng-show="isOpen(tag)">
+                    <div class="col col-10">
+                        <button class="button icon ion-plus-round" ng-click="buy(tag, opened.quantity)"></button>
+                    </div>
+                    <div class="col col-80">
+                        <div class="range">
+                            <input type="range" name="quantity" ng-model="opened.quantity" min="0" max="{{tag.in_bank}}" value="0">
+                        </div>
+                    </div>
+                    <div class="col col-10 orderValue">
+                        {{ opened.quantity * tag.value }} credits
+                    </div>
+                </div>
+            </ion-item>
+        </ion-list>
+    </ion-content>
+</ion-view>
