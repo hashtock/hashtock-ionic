@@ -1,50 +1,40 @@
-angular.module('starter.services', ['ngResource'])
+angular.module('starter.services', ['ionic'])
 
-/**
- * A simple example service that returns some data.
- */
-.factory('Friends', function() {
-  // Might use a resource here that returns a JSON array
+.factory('Helpers', function($ionicPlatform) {
+    return {
+        buildUrl: buildUrl,
+        handleError: handleError,
+        handleDeleteSuccess: handleDeleteSuccess,
+        handleSuccess: handleSuccess
+    };
 
-  // Some fake testing data
-  var friends = [
-    { id: 0, name: 'Scruff McGruff' },
-    { id: 1, name: 'G.I. Joe' },
-    { id: 2, name: 'Miss Frizzle' },
-    { id: 3, name: 'Ash Ketchum' }
-  ];
+    function buildUrl(uri) {
+        if (!$ionicPlatform.is('android')){
+            return "http://localhost:8080" + uri;
+        } else {
+            return "http://hashtock.appspot.com" + uri;
+        }
+    };
 
-  return {
-    all: function() {
-      return friends;
-    },
-    get: function(friendId) {
-      // Simple index lookup
-      return friends[friendId];
-    }
-  }
+    function handleError(response) {
+        if (!angular.isObject(response.data) || !response.data.message) {
+            return $q.reject("An error occurred.");
+        }
+        return $q.reject(response.data.message);
+    };
+
+    function handleSuccess(response) {
+        return response.data;
+    };
+    function handleDeleteSuccess(object) {
+        return function(response) {
+            return object;
+        }
+    };
 })
 
-.factory('ProfileStatic', function() {
-  var data = {
-    id: 'mr.fuxi@gmail.com',
-    photo: 'img/profile_placeholder.png',
-    founds: 1000
-  };
-
-  return {
-    current: function() {
-      return data;
-    },
-  }
-})
-
-.factory('ProfileRes', function($resource) {
-    return $resource('http://hashtock.appspot.com/api/user/?format=json');
-})
-
-.service('Profile', function ($http, $q){
-    var profile_base = 'http://hashtock.appspot.com/api/user/';
+.service('Profile', function ($http, $q, Helpers){
+    var profile_base = Helpers.buildUrl('/api/user/');
 
     return({
         current: current
@@ -56,31 +46,22 @@ angular.module('starter.services', ['ngResource'])
             url: profile_base
         });
 
-        return request.then(handleSuccess, handleError);
-    }
-
-    function handleError(response) {
-        if (!angular.isObject(response.data) || !response.data.message) {
-            return $q.reject("An error occurred.");
-        }
-        return $q.reject(response.data.message);
-    }
-
-    function handleSuccess(response) {
-        return response.data;
+        return request.then(Helpers.handleSuccess, Helpers.handleError);
     }
 })
 
-.service('Order', function ($http, $q){
-    var order_base = 'http://hashtock.appspot.com/api/order/';
+.service('Order', function ($http, $q, Helpers){
+    var order_base = Helpers.buildUrl('/api/order/');
 
     return({
+        current: current,
+        cancel: cancel,
         buy: buy
     });
 
     function buy(tag, quantity) {
         var request = $http({
-            method: "post",
+            method: 'POST',
             data: {
                 action: 'buy',
                 bank_order: true,
@@ -90,45 +71,71 @@ angular.module('starter.services', ['ngResource'])
             url: order_base
         });
 
-        return request.then(handleSuccess, handleError);
+        return request.then(Helpers.handleSuccess, Helpers.handleError);
     }
 
-    function handleError(response) {
-        if (!angular.isObject(response.data) || !response.data.message) {
-            return $q.reject("An error occurred.");
-        }
-        return $q.reject(response.data.message);
+    function cancel(order) {
+        var request = $http({
+            method: 'DELETE',
+            url: order_base + order.uuid + '/'
+        });
+
+        return request.then(Helpers.handleDeleteSuccess(order), Helpers.handleError);
     }
 
-    function handleSuccess(response) {
-        return response.data;
+    function current() {
+        var request = $http({
+            method: 'GET',
+            url: order_base
+        });
+
+        return request.then(Helpers.handleSuccess, Helpers.handleError);
     }
 })
 
-.service('OrdersRes', function ($resource){
-    var order_base = 'http://hashtock.appspot.com/api/order/?format=json';
+.service('Tag', function ($http, Helpers){
+    var tag_base = Helpers.buildUrl('/api/tag/');
 
-    var actions = {
-        'current': {
-            'method': 'GET',
-            'isArray': true
-        }
+    return({
+        all: all
+    });
+
+    function all() {
+        var request = $http({
+            method: 'GET',
+            url: tag_base
+        });
+
+        return request.then(Helpers.handleSuccess, Helpers.handleError);
     };
-
-    return $resource(order_base, null, actions);
 })
 
-.service('TagRes', function ($resource){
-    var tag_base = 'http://hashtock.appspot.com/api/tag/?format=json';
+.service('Opener', function() {
+    return function(defaults){
+        return({
+        _object: null,
+        value: angular.copy(defaults) || {},
 
-    var actions = {
-        'all': {
-            'method': 'GET',
-            'isArray': true
+        isOpen: function isOpen(obj) {
+            return this._object == obj;
+        },
+        open: function open(obj) {
+            this._object = obj;
+            this.value = angular.copy(defaults);
+        },
+        close: function close() {
+            this._object = null;
+            this.value = angular.copy(defaults);
+        },
+        toggle: function toggle(obj) {
+            if(this.isOpen(obj)) {
+                this.close();
+            } else {
+                this.open(obj);
+            }
         }
+        });
     };
-
-    return $resource(tag_base, null, actions);
 })
 
 ;

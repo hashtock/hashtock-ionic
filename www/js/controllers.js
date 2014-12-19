@@ -6,43 +6,40 @@ angular.module('starter.controllers', [])
     });
 })
 
-.controller('CurrentOrdersCtrl', function($scope, OrdersRes) {
-    $scope.orders = OrdersRes.current();
+.controller('CurrentOrdersCtrl', function($scope, Order, Opener) {
+    $scope.opener = Opener();
+
+    $scope.refresh = function refresh() {
+        Order.current().then(function (orders) {
+            $scope.orders = orders;
+        });
+    };
+
+    $scope.refresh();
+
+    $scope.cancel = function cancel(order) {
+        Order.cancel(order).then(function (order) {
+            $scope.opener.close();
+            var index = $scope.orders.indexOf(order);
+            if (index > -1) {
+                $scope.orders.splice(index, 1);
+            }
+            // reenable when controller's cache will be modified
+            // $scope.refresh();
+        });
+    };
 })
 
-.controller('BankCtrl', function($scope, TagRes, Order) {
-    $scope.tags = TagRes.all();
-    $scope.opened = {
-        quantity: 0,
-        hashtag: null,
-    };
+.controller('BankCtrl', function($scope, Tag, Order, Opener) {
+    $scope.opener = Opener({quantity: 0});
 
-    $scope.isOpen = function isOpen(tag) {
-        return tag.hashtag == $scope.opened.hashtag;
-    };
-    $scope.open = function open(tag) {
-        $scope.opened = {
-            quantity: 0,
-            hashtag: tag.hashtag,
-        };
-    };
-    $scope.close = function close() {
-        $scope.opened = {
-            quantity: 0,
-            hashtag: null,
-        };
-    };
-    $scope.toggle = function toggle(tag) {
-        if($scope.opened.hashtag == tag.hashtag) {
-            $scope.close();
-        } else {
-            $scope.open(tag);
-        }
-    };
+    Tag.all().then(function (tags) {
+        $scope.tags = tags;
+    });
 
     $scope.buy = function buy(tag, quantity) {
         Order.buy(tag, quantity).then(function (order) {
-            $scope.close();
+            $scope.opener.close();
         });
     }
 })

@@ -69,14 +69,14 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
     })
     ;
 
-  // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/tab/profile');
+    // if none of the above states are matched, use this as the fallback
+    $urlRouterProvider.otherwise('/tab/profile');
 
 })
 
 .config(['$httpProvider', function($httpProvider) {
-  $httpProvider.defaults.withCredentials = true;
-  $httpProvider.defaults.headers.post["Content-Type"] = "application/json"
-  $httpProvider.defaults.headers.common.Accept = "application/json";
+    $httpProvider.defaults.withCredentials = true;
+    $httpProvider.defaults.headers.post["Content-Type"] = "application/json"
+    $httpProvider.defaults.headers.common.Accept = "application/json";
 }])
 ;
