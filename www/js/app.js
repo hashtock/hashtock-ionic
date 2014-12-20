@@ -7,18 +7,30 @@
 // 'starter.controllers' is found in controllers.js
 angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
 
-.run(function($ionicPlatform) {
-  $ionicPlatform.ready(function() {
-    // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
-    // for form inputs)
-    if(window.cordova && window.cordova.plugins.Keyboard) {
-      cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
-    }
-    if(window.StatusBar) {
-      // org.apache.cordova.statusbar required
-      StatusBar.styleDefault();
-    }
-  });
+.run(function($ionicPlatform, $http) {
+    $ionicPlatform.ready(function() {
+        // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
+        // for form inputs)
+
+        // Authenticate on Android with Google account
+        if (plugins && plugins.GAEAuth) {
+            plugins.GAEAuth.get(function(accounts){
+                if(accounts.length > 0) {
+                    plugins.GAEAuth.authenticate(accounts[0].name, "hashtock", function (url) {
+                        $http.get(url);
+                    });
+                }
+            });
+        }
+
+        if(window.cordova && window.cordova.plugins.Keyboard) {
+            cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+        }
+        if(window.StatusBar) {
+            // org.apache.cordova.statusbar required
+            StatusBar.styleDefault();
+        }
+    });
 })
 
 .config(function($stateProvider, $urlRouterProvider) {

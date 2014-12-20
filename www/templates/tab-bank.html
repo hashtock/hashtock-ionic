@@ -3,9 +3,9 @@
         <ion-list>
             <ion-item ng-repeat="tag in tags">
                 <div class="row" ng-click="opener.toggle(tag)">
-                    <div class="col col-80">{{ tag.hashtag }}</div>
-                    <div class="col col-10">{{ tag.in_bank|number:2 }}</div>
-                    <div class="col col-10">{{ tag.value|number:2 }}</div>
+                    <div class="col col-60">{{ tag.hashtag }}</div>
+                    <div class="col col-20">{{ tag.in_bank|number:2 }}</div>
+                    <div class="col col-20">{{ tag.value|number:2 }}</div>
                 </div>
                 <div class="row buyOrder" ng-show="opener.isOpen(tag)">
                     <div class="col col-10">

@@ -3,14 +3,14 @@
         <ion-list>
             <ion-item ng-repeat="order in orders">
                 <div class="row" ng-click="opener.toggle(order)">
-                    <div class="col col-80">
+                    <div class="col col-60">
                         <i class="icon"
                            ng-class="{buy: 'ion-plus balanced',
                                       sell: 'ion-minus assertive'}[order.action]"></i>
                         {{ order.hashtag }}
                     </div>
-                    <div class="col col-10">{{ order.quantity|number:2 }}</div>
-                    <div class="col col-10">{{ order.bank_order }}</div>
+                    <div class="col col-20">{{ order.quantity|number:2 }}</div>
+                    <div class="col col-20">{{ order.bank_order }}</div>
                 </div>
                 <div class="centered" ng-show="opener.isOpen(order)">
                     <button class="button button-small button-assertive" ng-click="cancel(order)">
